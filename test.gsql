@@ -1,0 +1,25 @@
+###############################################################################
+# CUSTOMER EXPERIENCE 
+###############################################################################
+DROP GRAPH CustExp2
+CREATE GRAPH CustExp2()
+USE GRAPH CustExp2
+
+CREATE SCHEMA_CHANGE JOB custexp_schema FOR GRAPH CustExp2 {
+
+######################################
+#### VERTEX - Lookups
+######################################
+ADD VERTEX DataSource      (PRIMARY_ID source_id INT, source_name STRING, source_type STRING)  WITH primary_id_as_attribute="false", STATS="outdegree_by_edgetype";
+ADD VERTEX Referrer        (PRIMARY_ID referrer STRING)  WITH primary_id_as_attribute="true", STATS="outdegree_by_edgetype";
+ADD VERTEX Store   (PRIMARY_ID store_id INT, store_name STRING, store_type STRING, shiptostore STRING, autocenter STRING, salon STRING, store_zipcode STRING, store_city STRING, store_state STRING, store_market STRING, store_region STRING, store_lat DOUBLE, store_lng DOUBLE)  WITH primary_id_as_attribute="false", STATS="outdegree_by_edgetype";
+ADD VERTEX Products  (PRIMARY_ID item_id INT, item_desc STRING, department STRING, category STRING, productClass STRING, productBrand STRING, item_price DOUBLE, item_cost DOUBLE) WITH primary_id_as_attribute="false", STATS="outdegree_by_edgetype";
+ADD VERTEX Campaign (PRIMARY_ID keycode STRING, campaign_year INT, campaign_name STRING, campaign_category STRING, campaign_type STRING, campaign_channel STRING, start_date DATETIME, end_date DATETIME, solicit_qty INT, response_qty INT)  WITH primary_id_as_attribute="true", STATS="outdegree_by_edgetype";
+ADD VERTEX Promotions (PRIMARY_ID promo_id STRING, campaign_year INT, campaign_name STRING, campaign_category STRING, campaign_type STRING, campaign_channel STRING, start_date DATETIME, end_date DATETIME, solicit_qty INT, response_qty INT)  WITH primary_id_as_attribute="true", STATS="outdegree_by_edgetype";
+ADD VERTEX Ads (PRIMARY_ID ad_id STRING, campaign_year INT, campaign_name STRING, campaign_category STRING, campaign_type STRING, campaign_channel STRING, start_date DATETIME, end_date DATETIME, solicit_qty INT, response_qty INT)  WITH primary_id_as_attribute="true", STATS="outdegree_by_edgetype";
+
+
+}
+
+
+RUN SCHEMA_CHANGE JOB custexp2_schema

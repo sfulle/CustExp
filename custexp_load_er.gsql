@@ -1,0 +1,44 @@
+USE GRAPH CustExp
+DROP JOB custexp_load_er
+
+CREATE LOADING JOB custexp_load_er FOR GRAPH CustExp {
+
+  ###################################################################
+  # define customer group
+  ###################################################################
+  DEFINE FILENAME f_profile = "/home/tigergraph/mydata/ce_persona.csv";
+  DEFINE FILENAME f_ipaddr  = "/home/tigergraph/mydata/ce_ipaddr.csv";
+  DEFINE FILENAME f_device  = "/home/tigergraph/mydata/ce_devices.csv";
+  DEFINE FILENAME f_email   = "/home/tigergraph/mydata/ce_emails.csv";
+  DEFINE FILENAME f_phone   = "/home/tigergraph/mydata/ce_phones.csv";
+  DEFINE FILENAME f_address = "/home/tigergraph/mydata/ce_address.csv";
+  DEFINE FILENAME f_source  = "/home/tigergraph/mydata/ce_datasource.csv";
+
+  DEFINE HEADER hdr_profile = "user_id", "full_name", "user_name", "email_address", "cookie", "gender", "ssn", "birthdate", "job", "company", "creditcard", "ethnicity", "married", "income", "education", "address_id", "ipaddress", "phone_number", "device", "source_id";
+  DEFINE HEADER hdr_ipaddr  = "ipaddress", "ip_type", "ip_source";
+  DEFINE HEADER hdr_device  = "device_id", "device_type", "device_source";
+  DEFINE HEADER hdr_email   = "email", "email_type", "emal_perm", "email_freq", "email_source";
+  DEFINE HEADER hdr_phone   = "phone_number", "phone_company", "phone_network", "phone_type", "phone_5g", "phone_wifi", "phone_perm", "phone_freq";
+  DEFINE HEADER hdr_address = "address_id", "address_type", "address_line", "city", "state", "zip";
+  DEFINE HEADER hdr_source  = "source_id", "source_name", "source_type";
+
+  ###################################################################
+  # Entity Resolution
+  ###################################################################
+  LOAD f_ipaddr  TO VERTEX IpAddress VALUES ($"ipaddress", $"ip_type", $"ip_source") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_ipaddr";
+  LOAD f_device  TO VERTEX Device    VALUES ($"device_id", $"device_type") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_device";
+  LOAD f_email   TO VERTEX Email     VALUES ($"email", $"email_type", $"emal_perm", $"email_freq") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_email";
+  LOAD f_phone   TO VERTEX Phone     VALUES ($"phone_number", $"phone_company", $"phone_network", $"phone_type", $"phone_5g", $"phone_wifi", $"phone_perm", $"phone_freq") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_phone";
+  LOAD f_address TO VERTEX Address   VALUES ($"address_id", $"address_type", $"address_line", $"city", $"state", $"zip") USING header="false", separator=",", USER_DEFINED_HEADER="hdr_address";
+  LOAD f_source  TO VERTEX DataSource VALUES ($"source_id", $"source_name", $"source_type") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_source";
+
+  LOAD f_profile TO EDGE profile_ipaddress VALUES ($"user_id", $"ipaddress") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_profile";
+  LOAD f_profile TO EDGE profile_device VALUES ($"user_id", $"device") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_profile";
+  LOAD f_profile TO EDGE profile_email VALUES ($"user_id", $"email_address") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_profile";
+  LOAD f_profile TO EDGE profile_phone VALUES ($"user_id", $"phone_number") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_profile";
+  LOAD f_profile TO EDGE profile_address VALUES ($"user_id", $"address_id") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_profile";
+  LOAD f_profile TO EDGE profile_datasource VALUES ($"user_id", $"source_id") USING header="true", separator=",", USER_DEFINED_HEADER="hdr_profile";
+
+}
+
+RUN LOADING JOB custexp_load_er
